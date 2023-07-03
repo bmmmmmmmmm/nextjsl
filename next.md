@@ -51,3 +51,69 @@ CSR、SSR、同构、SSG、ISG
 构建 `nextjs` 项目 `npx create-next-app`
 
 从 `package.jaon` 中可以看到，启动命令是 `npm run dev` ，而 `npm run start` 则是生产环境的运行。因为 `react` 打包之后生成的全是静态文件，所以不需要有额外的生产环境命令。若要让 `nextjs` 也生成纯静态文件，则需要在 `package.json` 中额外加一条 `script` ：`"export": "next export",` ，但一定要确保网站是全静态且页面全部是可预生成的。
+
+
+
+## 1. 目录结构
+
+Next 13 更新了目录结构，由原来的 pages 目录模式变为了 app 目录模式，由于我是从 13 开始学习的，故不讨论两者的优劣，直接使用 app 目录模式。
+
+
+
+### 约定页面相关内容
+
+约定了每一个页面都需要有一个单独的目录，目录下约定了一些文件，均不需要手动引用，next 会按照约定读取：
+
+- `page.tsx` - 页面组件，类似 index.tsx。有 page.tsx 才能表明该路由是一个页面。
+- `layout.tsx` - 布局组件，切换路由时保留状态，不重新渲染。
+- `template.tsx` - 模版组件，和 `layout` 类似，但切换路由时会重新渲染，不保留状态。
+- `loading.tsx` - 加载组件，就是使用 `Suspense` 组件包裹 `Page` 组件，在 `Page` 组件渲染返回内容之前显示加载组件。
+- `error.tsx` - 错误文件，页面渲染异常的时候显示的组件。
+- `not-found.tsx` - 页面 404 组件，只在 `app` 目录下第一级目录生效，存在时只有根 `layout` 生效。
+
+一个常规的包含二级路由的目录结构如下：
+
+```tree
+app
+├── MlTest
+│   ├── M2Test
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   ├── template.tsx
+│   ├── loading.tsx
+│   └── error.tsx
+├── page.tsx
+├── layout.tsx
+├── template.tsx
+├── loading.tsx
+├── error.tsx
+└── not-found.tsx
+```
+
+此时进入 `/`、`/MlTest/M2Test` 均可看到相应界面，而 `/MlTest` 则会返回 404 页面，也即 app 下的 not-found.tsx 组件。
+
+
+
+### 平行路由和插槽功能
+
+
+
+
+
+
+
+
+
+
+
+
+
+> 参考资料：
+>
+> [SSR 与当年的 JSP、PHP 有什么区别？](https://segmentfault.com/a/1190000037793694)
+>
+> [鱼和熊掌兼得：Next.js 混合渲染](https://segmentfault.com/a/1190000039111126)
+>
+> [Next.js之前端渲染模式](https://juejin.cn/post/7160279477690466335)
+>
+> [Next.js 13 的 app 目录模式功能梳理](https://juejin.cn/post/7221162775074734135)
