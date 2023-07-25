@@ -106,6 +106,175 @@ app
 
 
 
+## n. td 项目
+
+link
+
+`npx create-next-app` 初始化
+
+
+
+### 添加 prisma
+
+`npm i prisma --save-dev`
+
+`npx prisma init --datasource-provider sqlite` 使用 `prisma`
+
+修改 `todolist/prisma/schema.prisma` 以添加新的 `model`
+
+`npx prisma migrate dev --name init `
+
+根据[这篇文档](https://www.prisma.io/docs/guides/other/troubleshooting-orm/help-articles/nextjs-prisma-client-dev-practices)，在 src 下新建 `db.ts`，写入以下文件：
+
+```ts
+import { PrismaClient } from '@prisma/client'
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+```
+
+目的是为了使 next 热更新的时候忽略掉 prisma
+
+
+
+### 客户端
+
+目录结构如下：
+
+```tree
+src
+├── app
+│   ├── new
+│   │   └── page.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components
+│   └── TodoItem
+│       └── index.tsx
+└── db.ts
+```
+
+在 `src/app/page.tsx` 中添加路由跳转链接：
+
+```tsx
+<Link href="/new">New</Link>
+```
+
+此时，点击 “New” 的时候，并没有进行整页刷新，而是像常规的 React 一样仅进行客户端路由的跳转。
+
+
+
+### 服务端渲染
+
+如果想要动态获取 todo 项，在通常的 react 项目中需要额外发送 ajax/fetch 请求，但是在 next 中，可以用服务端组件实现这一功能，只要使用 app router，就不需要其他额外操作。
+
+只需要将 `export default function Home() {}` 改成 `export default async function Home() {}`，即可在里面通过 `await` 访问到服务端所有数据。例如：
+
+```jsx
+const todos = await prisma.todo.findMany()
+```
+
+这时，实际上 todos 就是从数据库里读取的了。
+
+而这个过程发生在服务器上，服务器生成了所有 HTML 并将其发送到客户端。
+
+但此时数据库中没有任何数据。
+
+在组件中添加下述代码：
+
+```jsx
+await prisma.todo.create({
+  data: {
+    title: "test",
+    complete: false
+  }
+})
+```
+
+如果这段代码写在组件内部，则每次渲染组件的时候都会往数据库中添加一条数据，会发现每次刷新页面，都会多出一条数据。此时再把这段逻辑删掉，页面上数据不会增加了，但之前的数据还在，因为数据库中已经添加过数据了，而这一切都写在 react 组件内部，但事件却发生在服务端。
+
+
+
+### 添加数据
+
+添加数据的逻辑应该写在 `src/app/new/page.tsx` 下，
+
+在里面定义一个添加数据的函数：
+
+```tsx
+async function createTodo(data: FormData) {
+  "use server"
+  
+  console.log(data)
+}
+```
+
+其中，这个函数要处理用户提交的表单，所以我们希望它只在服务端运行，这时就需要在函数内部声明一下：`use server`。
+
+但此时页面会报错：
+
+```
+./src/app/new/page.tsx
+Error: 
+  x To use Server Actions, please enable the feature flag in your Next.js config. Read more: https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions#convention
+```
+
+因为这个功能现在还是实验性的，所以要更改一下 `next.config.js` 配置项：
+
+```js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    serverActions: true,
+  }
+}
+
+module.exports = nextConfig
+```
+
+此时，直接 `<form action={createTodo}` 即可将 `createTodo` 函数绑定到用户提交的表单上，点击 `Create` 即可调用该函数。
+
+其中，`createTodo` 内部的 `console.log` 并不会在浏览器控制台打印任何东西，因为它是一个纯粹的服务端函数，只会在服务端运行，`console.log` 只会在启动 `next` 项目的终端打印。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 > 参考资料：
