@@ -108,7 +108,7 @@ app
 
 ## n. td 项目
 
-link
+[link](https://www.youtube.com/watch?v=NgayZAuTgwM)
 
 `npx create-next-app` 初始化
 
@@ -245,7 +245,36 @@ module.exports = nextConfig
 
 
 
+### 出问题了
 
+在 `/new` 页面添加完成之后，返回主页，此时 `list` 并不会更新，刷新之后才会展示最新的 `list`。
+
+奇怪的是，这个 `bug` 并不是每次都会出现，每次添加都有概率展示最新的 `list`，而且似乎也没有什么规律。
+
+博主的视频里是每次都可以展示最新 `list` 的，但是我把他代码拉下来之后仍然有同样的错误。
+
+在 `next` 的控制台中可以看到这样的错误：
+
+![image-20230726下午95257402](https://blog-oss.kbm.ink/135257.png)
+
+```
+failed to get redirect response TypeError: fetch failed
+    at Object.fetch (/Users/modao/Documents/pers/nextjsl/todolist/node_modules/next/dist/compiled/undici/index.js:1:26669) {
+  cause: RequestContentLengthMismatchError: Request body length does not match content-length header
+      at write (/Users/modao/Documents/pers/nextjsl/todolist/node_modules/next/dist/compiled/undici/index.js:1:67105)
+      at _resume (/Users/modao/Documents/pers/nextjsl/todolist/node_modules/next/dist/compiled/undici/index.js:1:66726)
+      at resume (/Users/modao/Documents/pers/nextjsl/todolist/node_modules/next/dist/compiled/undici/index.js:1:65413)
+      at connect (/Users/modao/Documents/pers/nextjsl/todolist/node_modules/next/dist/compiled/undici/index.js:1:65301) {
+    code: 'UND_ERR_REQ_CONTENT_LENGTH_MISMATCH'
+  }
+}
+```
+
+看起来好像是 `fetch` 的时候出现了错误？
+
+把报错信息放到 `google` 中搜了一下，结果五花八门，我尝试加各种关键词，但都没有什么有用的信息。我意识到我根本不知道这个错误是从哪一环报出来的，是 `next` 还是 `prisma` ？亦或者是我的 `sqlite` 有问题？我甚至不知道 `prisma` 是怎么调的数据库，这个项目中我陌生的领域太多了，导致出现错误我都无法定位，只能像只耗子一样乱撞。
+
+所以，到此为止了，过阵子找个新的项目练手，或者拿着官方文档硬啃。
 
 
 
@@ -286,3 +315,5 @@ module.exports = nextConfig
 > [Next.js之前端渲染模式](https://juejin.cn/post/7160279477690466335)
 >
 > [Next.js 13 的 app 目录模式功能梳理](https://juejin.cn/post/7221162775074734135)
+>
+> [Learn Next.js 13 With This One Project](https://www.youtube.com/watch?v=NgayZAuTgwM)

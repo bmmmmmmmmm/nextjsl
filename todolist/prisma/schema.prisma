@@ -15,5 +15,5 @@ model Todo {
   title     String
   complete  Boolean
   createdAt DateTime @default(now())
-  updateAt  DateTime @updatedAt
+  updatedAt  DateTime @updatedAt
 }
